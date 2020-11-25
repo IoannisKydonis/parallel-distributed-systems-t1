@@ -37,7 +37,7 @@ int commonValueCountInSubarrays(int *arr, int start1, int end1, int start2, int 
     return count;
 }
 
-void cooSequential(int *rowsCoo, int *colsCoo, int nnz, int nc) {
+int cooSequential(int *rowsCoo, int *colsCoo, int nnz, int nc) {
     int triangleCount = 0;
     int **adj = (int **) malloc(nc * sizeof(int *));
     for (int i = 0; i < nc; i++)
@@ -57,11 +57,11 @@ void cooSequential(int *rowsCoo, int *colsCoo, int nnz, int nc) {
     for (int i = 0; i < nc; i++)
         free(adj[i]);
     free(adj);
-    printf("COO Triangles: %d\n", triangleCount);
+    return triangleCount;
 }
 
 // V3 Sequential
-void cscSequential(int *rowsCsc, int *colsCsc, int nc) {
+int cscSequential(int *rowsCsc, int *colsCsc, int nc) {
     int triangleCount = 0;
     for (int i = 0; i < nc; i++) {
         for (int j = colsCsc[i]; j < colsCsc[i + 1]; j++) {
@@ -70,13 +70,13 @@ void cscSequential(int *rowsCsc, int *colsCsc, int nc) {
                 triangleCount += commonValueCountInSubarrays(rowsCsc, colsCsc[subRow], colsCsc[subRow + 1], j + 1, colsCsc[i + 1]);
         }
     }
-    printf("CSC Triangles: %d\n", triangleCount);
+    return triangleCount;
 }
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         fprintf(stderr, "Usage: %s [matrix-market-filename]\n", argv[0]);
-        exit(1);
+        return EXIT_FAILURE;
     }
 
     int *rowsCoo, *colsCoo, nr, nc, nnz;
@@ -87,12 +87,14 @@ int main(int argc, char *argv[]) {
     int *colsCsc = (int *)malloc((nc + 1) * sizeof(int));
     coo2csc(rowsCsc, colsCsc, rowsCoo, colsCoo, nnz, nc, 0);
 
-    cooSequential(rowsCoo, colsCoo, nnz, nc);
+    int cooResult = cooSequential(rowsCoo, colsCoo, nnz, nc);
+    printf("COO Triangles: %d\n", cooResult);
     free(rowsCoo);
     free(colsCoo);
 
-    cscSequential(rowsCsc, colsCsc, nc);
+    int cscResult = cscSequential(rowsCsc, colsCsc, nc);
+    printf("CSC Triangles: %d\n", cscResult);
     free(rowsCsc);
     free(colsCsc);
-    return 0;
+    return EXIT_SUCCESS;
 }
