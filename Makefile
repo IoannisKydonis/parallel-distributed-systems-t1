@@ -10,3 +10,8 @@ main: main.c
 
 clean:
 	rm -f main
+
+test:
+	./main ./data/s12.mtx
+	./main ./data/bcsstm07.mtx
+	./main ./data/G1.mtx
