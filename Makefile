@@ -1,28 +1,12 @@
 CC=gcc-9
-CXX=g++-9
 CFLAGS=-O3
 
-CSRC = readmtx.c mmio.c coo2csc.c
-CPPSRC = main.cpp
-
-BUILD_PATH = build
-CPPOBJ := $(CPPSRC:%.cpp=%.o)
-COBJ := $(CSRC:%.c=%.o)
-OBJ := $(COBJ) $(CPPOBJ)
-BUILTOBJ := $(addprefix $(BUILD_PATH)/,$(OBJ))
+default: all
 
 all: main
 
-main: $(BUILTOBJ)
-	$(CXX) $(CPPFLAGS) -o $@ $(BUILTOBJ) $(LDLIBS)
-
-$(BUILD_PATH)/%.o: %.cpp
-	mkdir -p $(@D)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
-
-$(BUILD_PATH)/%.o: %.c
-	mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+main: main.c
+	$(CC) $(CFLAGS) -o $@ $^ readmtx.c mmio.c coo2csc.c
 
 clean:
 	rm -f main
