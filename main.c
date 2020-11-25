@@ -1,7 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "readmtx.h"
-#include "coo2csc.h"
+#include <stdio.h> // fprintf, printf
+#include <stdlib.h> // EXIT_FAILURE, EXIT_SUCCESS
+#include "readmtx.h" // readMtxFile
+#include "coo2csc.h" // coo2csc
 
 int binarySearch(int *arr, int start, int end, int target) {
     while (start <= end) {
