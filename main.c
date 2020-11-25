@@ -57,7 +57,6 @@ void cooSequential(int *rowsCoo, int *colsCoo, int nnz, int nc) {
     for (int i = 0; i < nc; i++)
         free(adj[i]);
     free(adj);
-
     printf("COO Triangles: %d\n", triangleCount);
 }
 
@@ -65,13 +64,10 @@ void cooSequential(int *rowsCoo, int *colsCoo, int nnz, int nc) {
 void cscSequential(int *rowsCsc, int *colsCsc, int nc) {
     int triangleCount = 0;
     for (int i = 0; i < nc; i++) {
-        int rowStart = colsCsc[i];
-        int rowEnd = colsCsc[i + 1];
-        for (int j = rowStart; j < rowEnd; j++) {
+        for (int j = colsCsc[i]; j < colsCsc[i + 1]; j++) {
             int subRow = rowsCsc[j];
-            if (i == subRow)
-                continue;
-            triangleCount += commonValueCountInSubarrays(rowsCsc, colsCsc[subRow], colsCsc[subRow + 1], j + 1, rowEnd);
+            if (i != subRow)
+                triangleCount += commonValueCountInSubarrays(rowsCsc, colsCsc[subRow], colsCsc[subRow + 1], j + 1, colsCsc[i + 1]);
         }
     }
     printf("CSC Triangles: %d\n", triangleCount);
