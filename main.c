@@ -73,6 +73,23 @@ int cscSequential(int *rowsCsc, int *colsCsc, int nc) {
     return triangleCount;
 }
 
+// V3 Parallel with OpenMP
+int cscParallelOmp(int *rowsCsc, int *colsCsc, int nc) {
+    int triangleCount = 0;
+#pragma omp parallel for
+    for (int i = 0; i < nc; i++) {
+        int localSum = 0;
+        for (int j = colsCsc[i]; j < colsCsc[i + 1]; j++) {
+            int subRow = rowsCsc[j];
+            if (i != subRow)
+                localSum += commonValueCountInSubarrays(rowsCsc, colsCsc[subRow], colsCsc[subRow + 1], j + 1,colsCsc[i + 1]);
+        }
+#pragma omp critical
+        triangleCount += localSum;
+    }
+    return triangleCount;
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         fprintf(stderr, "Usage: %s [matrix-market-filename]\n", argv[0]);
@@ -85,7 +102,7 @@ int main(int argc, char *argv[]) {
 
     int *rowsCsc = (int *)malloc(nnz * sizeof(int));
     int *colsCsc = (int *)malloc((nc + 1) * sizeof(int));
-    coo2csc(rowsCsc, colsCsc, rowsCoo, colsCoo, nnz, nc, 0);
+    coo2csc(rowsCsc, colsCsc, rowsCoo, colsCoo, nnz, nc, 0); // TODO: kydonis - check if unsigned ints are needed
 
     int cooResult = cooSequential(rowsCoo, colsCoo, nnz, nc);
     printf("COO Triangles: %d\n", cooResult);

@@ -6,7 +6,7 @@ default: all
 all: main
 
 main: main.c
-	$(CC) $(CFLAGS) -o $@ $^ readmtx.c mmio.c coo2csc.c
+	$(CC) $(CFLAGS) -o $@ $^ readmtx.c mmio.c coo2csc.c -fopenmp
 
 clean:
 	rm -f main
