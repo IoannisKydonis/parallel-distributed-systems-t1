@@ -22,8 +22,7 @@ void swapInts(int *n1, int *n2) {
     *n2 = temp;
 }
 
-int commonValueCountInSubarrays(int *arr, int start1, int end1, int start2, int end2) {
-    int count = 0;
+void checkForCommonValueInSubarrays(int *arr, int start1, int end1, int start2, int end2, int *c3, int colIndex1, int colIndex2) {
     if (end1 - start1 < end2 - start2) {
         swapInts(&start1, &start2);
         swapInts(&end1, &end2);
@@ -31,14 +30,34 @@ int commonValueCountInSubarrays(int *arr, int start1, int end1, int start2, int 
     for (int k = start2; k < end2; k++) {
         if (k == arr[k])
             continue;
-        if (binarySearch(arr, start1, end1 - 1, arr[k]))
-            count++;
+        if (binarySearch(arr, start1, end1 - 1, arr[k])) {
+#pragma omp critical
+            {
+                c3[colIndex1]++;
+                c3[colIndex2]++;
+                c3[arr[k]]++;
+            }
+        }
     }
-    return count;
 }
 
-int cooSequential(int *rowsCoo, int *colsCoo, int nnz, int nc) {
-    int triangleCount = 0;
+void zeroOutArray(int *arr, int length) {
+    for (int i = 0; i < length; i++)
+        arr[i] = 0;
+}
+
+void printArray(int *arr, int length) {
+    for (int i = 0; i < length; i++)
+        printf("%d ", arr[i]);
+    printf("\n");
+}
+
+void mergeArrays(int *target, int *source, int length) {
+    for (int i = 0; i < length; i++)
+        target[i] += source[i];
+}
+
+void cooSequential(int *rowsCoo, int *colsCoo, int *c3, int nnz, int nc) {
     int **adj = (int **) malloc(nc * sizeof(int *));
     for (int i = 0; i < nc; i++)
         adj[i] = (int *) malloc(nc * sizeof(int));
@@ -52,42 +71,37 @@ int cooSequential(int *rowsCoo, int *colsCoo, int nnz, int nc) {
     for (int i = 0; i < nc; i++)
         for (int j = i + 1; j < nc; j++)
             for (int k = j + 1; k < nc; k++)
-                if (adj[i][j] == 1 && adj[j][k] == 1 && adj[k][i] == 1)
-                    triangleCount++;
+                if (adj[i][j] == 1 && adj[j][k] == 1 && adj[k][i] == 1) {
+                    c3[i]++;
+                    c3[j]++;
+                    c3[k]++;
+                }
     for (int i = 0; i < nc; i++)
         free(adj[i]);
     free(adj);
-    return triangleCount;
 }
 
 // V3 Sequential
-int cscSequential(int *rowsCsc, int *colsCsc, int nc) {
-    int triangleCount = 0;
+void cscSequential(int *rowsCsc, int *colsCsc, int *c3, int nc) {
     for (int i = 0; i < nc; i++) {
         for (int j = colsCsc[i]; j < colsCsc[i + 1]; j++) {
             int subRow = rowsCsc[j];
             if (i != subRow)
-                triangleCount += commonValueCountInSubarrays(rowsCsc, colsCsc[subRow], colsCsc[subRow + 1], j + 1, colsCsc[i + 1]);
+                checkForCommonValueInSubarrays(rowsCsc, colsCsc[subRow], colsCsc[subRow + 1], j + 1, colsCsc[i + 1], c3, subRow, i);
         }
     }
-    return triangleCount;
 }
 
 // V3 Parallel with OpenMP
-int cscParallelOmp(int *rowsCsc, int *colsCsc, int nc) {
-    int triangleCount = 0;
+void cscParallelOmp(int *rowsCsc, int *colsCsc, int *c3, int nc) {
 #pragma omp parallel for
     for (int i = 0; i < nc; i++) {
-        int localSum = 0;
         for (int j = colsCsc[i]; j < colsCsc[i + 1]; j++) {
             int subRow = rowsCsc[j];
             if (i != subRow)
-                localSum += commonValueCountInSubarrays(rowsCsc, colsCsc[subRow], colsCsc[subRow + 1], j + 1,colsCsc[i + 1]);
+                checkForCommonValueInSubarrays(rowsCsc, colsCsc[subRow], colsCsc[subRow + 1], j + 1,colsCsc[i + 1], c3, subRow, i);
         }
-#pragma omp critical
-        triangleCount += localSum;
     }
-    return triangleCount;
 }
 
 int main(int argc, char *argv[]) {
@@ -104,14 +118,34 @@ int main(int argc, char *argv[]) {
     int *colsCsc = (int *)malloc((nc + 1) * sizeof(int));
     coo2csc(rowsCsc, colsCsc, rowsCoo, colsCoo, nnz, nc, 0); // TODO: kydonis - check if unsigned ints are needed
 
-    int cooResult = cooSequential(rowsCoo, colsCoo, nnz, nc);
-    printf("COO Triangles: %d\n", cooResult);
+    int *c3Coo = (int *)malloc(nc * sizeof(int));
+    zeroOutArray(c3Coo, nc);
+    cooSequential(rowsCoo, colsCoo, c3Coo, nnz, nc);
     free(rowsCoo);
     free(colsCoo);
 
-    int cscResult = cscSequential(rowsCsc, colsCsc, nc);
-    printf("CSC Triangles: %d\n", cscResult);
+    int *c3Csc = (int *)malloc(nc * sizeof(int));
+    zeroOutArray(c3Csc, nc);
+    cscParallelOmp(rowsCsc, colsCsc, c3Csc, nc);
+
+    int correct = 1;
+    int totalTrianglesCoo = 0;
+    int totalTrianglesCsc = 0;
+    for (int i = 0; i < nc; i++) {
+        if (c3Coo[i] != c3Csc[i])
+            correct = 0;
+        totalTrianglesCoo += c3Coo[i];
+        totalTrianglesCsc += c3Csc[i];
+    }
+    printf("CSC - COO Match: %s\n", correct ? "TRUE" : "FALSE");
+    printArray(c3Coo, nc);
+    printArray(c3Csc, nc);
+    printf("COO Triangles: %d\n", totalTrianglesCoo / 3);
+    printf("CSC Triangles: %d\n", totalTrianglesCsc / 3);
+
     free(rowsCsc);
     free(colsCsc);
+    free(c3Coo);
+    free(c3Csc);
     return EXIT_SUCCESS;
 }
