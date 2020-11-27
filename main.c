@@ -31,12 +31,12 @@ void checkForCommonValueInSubarrays(int *arr, int start1, int end1, int start2, 
         if (k == arr[k])
             continue;
         if (binarySearch(arr, start1, end1 - 1, arr[k])) {
-#pragma omp critical
-            {
+#pragma omp atomic
                 c3[colIndex1]++;
+#pragma omp atomic
                 c3[colIndex2]++;
+#pragma omp atomic
                 c3[arr[k]]++;
-            }
         }
     }
 }
