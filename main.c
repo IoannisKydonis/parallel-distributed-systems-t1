@@ -1,21 +1,9 @@
 #include <stdio.h> // fprintf, printf
 #include <stdlib.h> // EXIT_FAILURE, EXIT_SUCCESS
-#include <time.h> // clock_gettime, timespec
 #include "readmtx.h" // readMtxFile
 #include "coo2csc.h" // coo2csc
-
-int binarySearch(int *arr, int start, int end, int target) {
-    while (start <= end) {
-        int middle = (start + end) / 2;
-        if (arr[middle] < target)
-            start = middle + 1;
-        else if (arr[middle] > target)
-            end = middle - 1;
-        else
-            return 1;
-    }
-    return 0;
-}
+#include "timer.h" // measureTimeForRunnable
+#include "arrayutils.h" // binarySearch, zeroOutArray, printArray
 
 void swapInts(int *n1, int *n2) {
     int temp = *n1;
@@ -40,22 +28,6 @@ void checkForCommonValueInSubarrays(int *arr, int start1, int end1, int start2, 
                 c3[arr[k]]++;
         }
     }
-}
-
-void zeroOutArray(int *arr, int length) {
-    for (int i = 0; i < length; i++)
-        arr[i] = 0;
-}
-
-void printArray(int *arr, int length) {
-    for (int i = 0; i < length; i++)
-        printf("%d ", arr[i]);
-    printf("\n");
-}
-
-void mergeArrays(int *target, int *source, int length) {
-    for (int i = 0; i < length; i++)
-        target[i] += source[i];
 }
 
 void cooSequential(int *rowsCoo, int *colsCoo, int *c3, int nnz, int nc) {
@@ -119,55 +91,35 @@ int main(int argc, char *argv[]) {
     int *colsCsc = (int *)malloc((nc + 1) * sizeof(int));
     coo2csc(rowsCsc, colsCsc, rowsCoo, colsCoo, nnz, nc, 0); // TODO: kydonis - check if unsigned ints are needed
 
-//    int *c3Coo = (int *)malloc(nc * sizeof(int));
-//    zeroOutArray(c3Coo, nc);
-//    cooSequential(rowsCoo, colsCoo, c3Coo, nnz, nc);
     free(rowsCoo);
     free(colsCoo);
 
-    struct timespec ts_start;
-    struct timespec ts_end;
-
     int *c3Csc = (int *)malloc(nc * sizeof(int));
     zeroOutArray(c3Csc, nc);
-    clock_gettime(CLOCK_MONOTONIC, &ts_start);
-    cscSequential(rowsCsc, colsCsc, c3Csc, nc);
-    clock_gettime(CLOCK_MONOTONIC, &ts_end);
-    double sequentialCscTime = (ts_end.tv_sec - ts_start.tv_sec) + (ts_end.tv_nsec - ts_start.tv_nsec) / 1000000000.0;
-
+    double sequentialCscTime = measureTimeForRunnable(cscSequential, rowsCsc, colsCsc, c3Csc, nc);
 
     int *c3CscParallel = (int *)malloc(nc * sizeof(int));
     zeroOutArray(c3CscParallel, nc);
-    clock_gettime(CLOCK_MONOTONIC, &ts_start);
-    cscParallelOmp(rowsCsc, colsCsc, c3CscParallel, nc);
-    clock_gettime(CLOCK_MONOTONIC, &ts_end);
-    double parallelCscTime = (ts_end.tv_sec - ts_start.tv_sec) + (ts_end.tv_nsec - ts_start.tv_nsec) / 1000000000.0;
+    double parallelCscTime = measureTimeForRunnable(cscParallelOmp, rowsCsc, colsCsc, c3CscParallel, nc);
 
     int correct = 1;
-    int totalTrianglesCoo = 0;
     int totalTrianglesCsc = 0;
     int totalTrianglesCscParallel = 0;
     for (int i = 0; i < nc; i++) {
         if (c3Csc[i] != c3CscParallel[i])
             correct = 0;
-//        totalTrianglesCoo += c3Coo[i];
         totalTrianglesCsc += c3Csc[i];
         totalTrianglesCscParallel += c3CscParallel[i];
     }
     printf("CSC - CSC Par Match: %s\n", correct ? "TRUE" : "FALSE");
-//    printArray(c3Coo, nc);
-//    printArray(c3Csc, nc);
-//    printArray(c3CscParallel, nc);
-//    printf("COO Triangles: %d\n", totalTrianglesCoo / 3);
     printf("CSC Triangles: %d\n", totalTrianglesCsc / 3);
     printf("CSC Parallel Triangles: %d\n", totalTrianglesCscParallel / 3);
-    printf("CSC Time:          %lf\n", sequentialCscTime);
-    printf("CSC Parallel Time: %lf\n", parallelCscTime);
-    printf("Time difference: %lf\n", sequentialCscTime - parallelCscTime);
+    printf("CSC Time:          %04.6lf seconds\n", sequentialCscTime);
+    printf("CSC Parallel Time: %04.6lf seconds\n", parallelCscTime);
+    printf("Time difference:   %04.6lf seconds\n", sequentialCscTime - parallelCscTime);
 
     free(rowsCsc);
     free(colsCsc);
-//    free(c3Coo);
     free(c3Csc);
     free(c3CscParallel);
     return EXIT_SUCCESS;

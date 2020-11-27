@@ -6,7 +6,7 @@ default: all
 all: main
 
 main: main.c
-	$(CC) $(CFLAGS) -o $@ $^ readmtx.c mmio.c coo2csc.c -fopenmp
+	$(CC) $(CFLAGS) -o $@ $^ readmtx.c mmio.c coo2csc.c timer.c arrayutils.c -fopenmp -fcilkplus
 
 clean:
 	rm -f main
