@@ -114,9 +114,9 @@ int main(int argc, char *argv[]) {
     printf("CSC - CSC Par Match: %s\n", correct ? "TRUE" : "FALSE");
     printf("CSC Triangles: %d\n", totalTrianglesCsc / 3);
     printf("CSC Parallel Triangles: %d\n", totalTrianglesCscParallel / 3);
-    printf("CSC Time:          %04.6lf seconds\n", sequentialCscTime);
-    printf("CSC Parallel Time: %04.6lf seconds\n", parallelCscTime);
-    printf("Time difference:   %04.6lf seconds\n", sequentialCscTime - parallelCscTime);
+    printf("CSC Time:          %10.6lf seconds\n", sequentialCscTime);
+    printf("CSC Parallel Time: %10.6lf seconds\n", parallelCscTime);
+    printf("Time difference:   %10.6lf seconds\n", sequentialCscTime - parallelCscTime);
 
     free(rowsCsc);
     free(colsCsc);
