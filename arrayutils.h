@@ -17,6 +17,4 @@ void cscMatrixVectorMultiplication(uint32_t *row, uint32_t *col, uint32_t *vecto
 
 uint32_t cmp(const void *a, const void *b);
 
-void cscMaskedMatrixSquare(uint32_t *row, uint32_t *col, uint32_t *res, uint32_t nc);
-
 #endif //ARRAYUTILS_H
