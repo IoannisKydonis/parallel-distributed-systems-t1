@@ -5,8 +5,8 @@ default: all
 
 all: main
 
-main: v4_omp.c
-	$(CC) $(CFLAGS) -o $@ $^ readmtx.c mmio.c coo2csc.c timer.c arrayutils.c -fopenmp
+main: v4_pt.c
+	$(CC) $(CFLAGS) -o $@ $^ readmtx.c mmio.c coo2csc.c timer.c arrayutils.c -lpthread
 
 clean:
 	rm -f main
