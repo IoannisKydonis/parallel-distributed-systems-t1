@@ -18,8 +18,6 @@ struct Arg {
     int executeTo;
 };
 
-pthread_mutex_t mutex;
-
 void *multiplyMatrices(void *argument) {
     struct Arg a = *(struct Arg *) argument;
 
