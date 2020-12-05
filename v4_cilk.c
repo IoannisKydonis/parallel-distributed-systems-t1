@@ -54,8 +54,8 @@ void cscMaskedMatrixSquare(int *row, int *col, int *res, int nc) {
     free(colSizes);
 }
 
-// V4 Parallel with OpenMP
-void cscParallelV4Omp(int *rowsCsc, int *colsCsc, int *c3, int nc) {
+// V4 Parallel with Cilk
+void cscParallelV4Cilk(int *rowsCsc, int *colsCsc, int *c3, int nc) {
     int *res = (int *)malloc(colsCsc[nc] * sizeof(int));
     cscMaskedMatrixSquare(rowsCsc, colsCsc, res, nc);
     for (int i = 0; i < nc; i++) {
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
     int *colsCsc = (int *)malloc((nc + 1) * sizeof(int));
     coo2csc(rowsCsc, colsCsc, rowsCoo, colsCoo, nnz, nc, 0); // TODO: kydonis - check if unsigned ints are needed
 
-    runAndPresentResult(rowsCsc, colsCsc, nc, cscParallelV4Omp, "V4 Parallel OpenMP");
+    runAndPresentResult(rowsCsc, colsCsc, nc, cscParallelV4Cilk, "V4 Parallel Cilk");
 
     free(rowsCoo);
     free(colsCoo);
