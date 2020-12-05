@@ -1,20 +1,22 @@
 #ifndef ARRAYUTILS_H
 #define ARRAYUTILS_H
 
-int binarySearch(int *arr, int start, int end, int target);
+#include <stdint.h>
 
-void zeroOutArray(int *arr, int length);
+uint32_t binarySearch(uint32_t *arr, uint32_t start, uint32_t end, uint32_t target);
 
-void printArray(int *arr, int length);
+void zeroOutArray(uint32_t *arr, uint32_t length);
 
-void mergeArrays(int *arr1, int *arr2, int *res, int length1, int length2);
+void printArray(uint32_t *arr, uint32_t length);
 
-int countCommonElementsInSortedArrays(int *arr1, int *arr2, int length1, int length2);
+void mergeArrays(uint32_t *arr1, uint32_t *arr2, uint32_t *res, uint32_t length1, uint32_t length2);
 
-void cscMatrixVectorMultiplication(int *row, int *col, int *vector, int *res, int nc);
+uint32_t countCommonElementsInSortedArrays(uint32_t *arr1, uint32_t *arr2, uint32_t length1, uint32_t length2);
 
-int cmp(const void *a, const void *b);
+void cscMatrixVectorMultiplication(uint32_t *row, uint32_t *col, uint32_t *vector, uint32_t *res, uint32_t nc);
 
-void cscMaskedMatrixSquare(int *row, int *col, int *res, int nc);
+uint32_t cmp(const void *a, const void *b);
+
+void cscMaskedMatrixSquare(uint32_t *row, uint32_t *col, uint32_t *res, uint32_t nc);
 
 #endif //ARRAYUTILS_H

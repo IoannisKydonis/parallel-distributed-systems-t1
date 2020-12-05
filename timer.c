@@ -1,6 +1,7 @@
 #include <time.h> // clock_gettime, timespec
+#include <stdint.h>
 
-double measureTimeForRunnable(void (* runnable) (int *, int *, int *, int), int *arg1, int *arg2, int *arg3, int arg4) {
+double measureTimeForRunnable(void (* runnable) (uint32_t *, uint32_t *, uint32_t *, uint32_t), uint32_t *arg1, uint32_t *arg2, uint32_t *arg3, uint32_t arg4) {
     struct timespec ts_start;
     struct timespec ts_end;
     clock_gettime(CLOCK_MONOTONIC, &ts_start);

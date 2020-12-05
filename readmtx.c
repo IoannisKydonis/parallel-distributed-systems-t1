@@ -26,13 +26,13 @@
 #include <stdlib.h>
 #include "mmio.h"
 
-int readMtxFile(char *filename, int **rows, int **columns, int *rowCount, int *colCount, int *nnz)
+int readMtxFile(char *filename, uint32_t **rows, uint32_t **columns, uint32_t *rowCount, uint32_t *colCount, uint32_t *nnz)
 {
     int ret_code;
     MM_typecode matcode;
     FILE *f;
-    int M, N, nz;
-    int i, *I, *J;
+    uint32_t M, N, nz;
+    uint32_t i, *I, *J;
     double *val;
 
     if ((f = fopen(filename, "r")) == NULL)
@@ -64,8 +64,8 @@ int readMtxFile(char *filename, int **rows, int **columns, int *rowCount, int *c
 
     /* reseve memory for matrices */
 
-    I = (int *) malloc(nz * sizeof(int));
-    J = (int *) malloc(nz * sizeof(int));
+    I = (uint32_t *) malloc(nz * sizeof(uint32_t));
+    J = (uint32_t *) malloc(nz * sizeof(uint32_t));
     val = (double *) malloc(nz * sizeof(double));
 
     *rows = I;

@@ -4,36 +4,36 @@
 #include "timer.h" // measureTimeForRunnable
 #include "arrayutils.h" // binarySearch, zeroOutArray, printArray
 
-void cooSequential(int *rowsCoo, int *colsCoo, int *c3, int nnz, int nc) {
-    int **adj = (int **) malloc(nc * sizeof(int *));
-    for (int i = 0; i < nc; i++)
-        adj[i] = (int *) malloc(nc * sizeof(int));
-    for (int i = 0; i < nc; i++)
-        for (int j = 0; j < nc; j++)
+void cooSequential(uint32_t *rowsCoo, uint32_t *colsCoo, uint32_t *c3, uint32_t nnz, uint32_t nc) {
+    uint32_t **adj = (uint32_t **) malloc(nc * sizeof(uint32_t *));
+    for (uint32_t i = 0; i < nc; i++)
+        adj[i] = (uint32_t *) malloc(nc * sizeof(uint32_t));
+    for (uint32_t i = 0; i < nc; i++)
+        for (uint32_t j = 0; j < nc; j++)
             adj[i][j] = 0;
-    for (int i = 0; i < nnz; i++) {
+    for (uint32_t i = 0; i < nnz; i++) {
         adj[colsCoo[i]][rowsCoo[i]] = 1;
         adj[rowsCoo[i]][colsCoo[i]] = 1;
     }
-    for (int i = 0; i < nc; i++)
-        for (int j = i + 1; j < nc; j++)
-            for (int k = j + 1; k < nc; k++)
+    for (uint32_t i = 0; i < nc; i++)
+        for (uint32_t j = i + 1; j < nc; j++)
+            for (uint32_t k = j + 1; k < nc; k++)
                 if (adj[i][j] == 1 && adj[j][k] == 1 && adj[k][i] == 1) {
                     c3[i]++;
                     c3[j]++;
                     c3[k]++;
                 }
-    for (int i = 0; i < nc; i++)
+    for (uint32_t i = 0; i < nc; i++)
         free(adj[i]);
     free(adj);
 }
 
-void runAndPresentResult(int *rowsCsc, int *colsCsc, int nc, void (* runnable) (int *, int *, int *, int), char *name) {
-    int *c3 = (int *)malloc(nc * sizeof(int));
+void runAndPresentResult(uint32_t *rowsCsc, uint32_t *colsCsc, uint32_t nc, void (* runnable) (uint32_t *, uint32_t *, uint32_t *, uint32_t), char *name) {
+    uint32_t *c3 = (uint32_t *)malloc(nc * sizeof(uint32_t));
     zeroOutArray(c3, nc);
     double time = measureTimeForRunnable(runnable, rowsCsc, colsCsc, c3, nc);
-    int triangles = 0;
-    for (int i = 0; i < nc; i++)
+    uint32_t triangles = 0;
+    for (uint32_t i = 0; i < nc; i++)
         triangles += c3[i];
     triangles /= 3;
     printf("-----------------------------------\n");
@@ -50,15 +50,15 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    int *rowsCoo, *colsCoo, nr, nc, nnz;
+    uint32_t *rowsCoo, *colsCoo, nr, nc, nnz;
 
     readMtxFile(argv[1], &rowsCoo, &colsCoo, &nr, &nc, &nnz);
 
-    int *c3 = (int *)malloc(nc * sizeof(int));
+    uint32_t *c3 = (uint32_t *)malloc(nc * sizeof(uint32_t));
     zeroOutArray(c3, nc);
     cooSequential(rowsCoo, colsCoo, c3, nnz, nc);
-    int triangles = 0;
-    for (int i = 0; i < nc; i++)
+    uint32_t triangles = 0;
+    for (uint32_t i = 0; i < nc; i++)
         triangles += c3[i];
     triangles /= 3;
     printf("-----------------------------------\n");
