@@ -1,4 +1,5 @@
 #include <stdio.h> // fprintf, printf
+#include <stdlib.h> // malloc
 
 int binarySearch(int *arr, int start, int end, int target) {
     while (start <= end) {
@@ -22,4 +23,127 @@ void printArray(int *arr, int length) {
     for (int i = 0; i < length; i++)
         printf("%d ", arr[i]);
     printf("\n");
+}
+
+void mergeArrays(int *arr1, int *arr2, int *res, int length1, int length2) {
+    int index1 = 0;
+    int index2 = 0;
+    while (index1 < length1 && index2 < length2) {
+        if (arr1[index1] < arr2[index2]) {
+            res[index1 + index2] = arr1[index1];
+            index1++;
+        } else {
+            res[index1 + index2] = arr2[index2];
+            index2++;
+        }
+    }
+    while (index1 < length1) {
+        res[index1 + index2] = arr1[index1];
+        index1++;
+    }
+    while (index2 < length2) {
+        res[index1 + index2] = arr2[index2];
+        index2++;
+    }
+}
+
+int countCommonElementsInSortedArrays(int *arr1, int *arr2, int length1, int length2) {
+    int sum = 0;
+    int index1 = 0;
+    int index2 = 0;
+    while (index1 < length1 && index2 < length2) {
+        if (arr1[index1] < arr2[index2]) {
+            index1++;
+        } else if (arr1[index1] > arr2[index2]) {
+            index2++;
+        } else {
+            sum++;
+            index1++;
+            index2++;
+        }
+    }
+    return sum;
+}
+
+void cscMatrixVectorMultiplication(int *row, int *col, int *vector, int *res, int nc) {
+    for (int i = 0; i < nc; i++) {
+        res[i] = 0;
+        for (int j = col[i]; j < col[i + 1]; j++)
+            res[i] += vector[row[j]];
+    }
+}
+
+int cmp(const void *a, const void *b) {
+    return (*(int *)a - *(int *)b);
+}
+
+void cscMaskedMatrixSquare(int *row, int *col, int *res, int nc) {
+//    int *colSizes = (int *)malloc(nc * sizeof(int));
+//    zeroOutArray(colSizes, nc);
+//    for (int i = 0; i < nc; i++) {
+//        for (int j = col[i]; j < col[i + 1]; j++) {
+//            colSizes[row[j]]++;
+//        }
+//    }
+//
+//    int *colIndexes = (int *)malloc(nc * sizeof(int));
+//    zeroOutArray(colIndexes, nc);
+//    int **symmetricRowItems = (int **)malloc(nc * sizeof(int *));
+//    for (int i = 0; i < nc; i++)
+//        symmetricRowItems[i] = (int *)malloc(colSizes[i] * sizeof(int));
+//    for (int i = 0; i < nc; i++) {
+//        for (int j = col[i]; j < col[i + 1]; j++) {
+//            symmetricRowItems[row[j]][colIndexes[row[j]]] = i;
+//            colIndexes[row[j]]++;
+//        }
+//    }
+//
+//    // Multiply
+//    for (int i = 0; i < nc; i++) {
+//        for (int j = col[i]; j < col[i + 1]; j++) {
+//            int curRow = i;
+//            int curCol = row[j];
+//            if (curRow == curCol)
+//                continue;
+//            int fullRowSize = col[curRow + 1] - col[curRow] + colSizes[curRow];
+//            int *fullRow = (int *)malloc(fullRowSize * sizeof(int));
+//            mergeArrays(row + col[curRow], symmetricRowItems[curRow], fullRow, col[curRow + 1] - col[curRow], colSizes[curRow]);
+//            int fullColSize = col[curCol + 1] - col[curCol] + colSizes[curCol];
+//            int *fullCol = (int *)malloc(fullColSize * sizeof(int));
+//            mergeArrays(row + col[curCol], symmetricRowItems[curCol], fullCol, col[curCol + 1] - col[curCol], colSizes[curCol]);
+//            int sum = countCommonElementsInSortedArrays(fullRow, fullCol, fullRowSize, fullColSize);
+//            res[j] = sum;
+//            free(fullRow);
+//            free(fullCol);
+//        }
+//    }
+//
+//    for (int i = 0; i < nc; i++)
+//        free(symmetricRowItems[i]);
+//    free(symmetricRowItems);
+//    free(colIndexes);
+//    free(colSizes);
+
+    for (int i = 0; i < nc; i++) {
+        int *l1 = (int *)malloc((col[i + 1] - col[i]) * sizeof(int));
+        for (int k = col[i]; k < col[i + 1]; k++) {
+            l1[k - col[i]] = row[k];
+        }
+        printf("%d %d\n", col[i], col[i + 1]);
+        qsort(l1, col[i + 1] - col[i], sizeof(int), cmp);
+        for (int j = col[i]; j < col[i + 1]; j++) {
+            if (i == row[j])
+                continue;
+            int *l2 = (int *)malloc((col[row[j] + 1] - col[row[j]]) * sizeof(int));
+            for (int k = col[row[j]]; k < col[row[j] + 1]; k++) {
+                l2[k - col[row[j]]] = row[k];
+            }
+            printf("-- -- %d, %d\n", row[j], (col[row[j] + 1] - col[row[j]]));
+            qsort(l2, col[row[j] + 1] - col[row[j]], sizeof(int), cmp);
+            int sum = countCommonElementsInSortedArrays(l1,l2, col[i + 1] - col[i], col[row[j] + 1] - col[row[j]]);
+            res[j] = sum;
+            free(l2);
+        }
+        free(l1);
+    }
 }
