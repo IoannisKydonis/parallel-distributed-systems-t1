@@ -77,50 +77,50 @@ int cmp(const void *a, const void *b) {
     return (*(int *)a - *(int *)b);
 }
 
-void cscMaskedMatrixSquare(int *row, int *col, int *res, int nc) {
-    int *colSizes = (int *)malloc(nc * sizeof(int));
-    zeroOutArray(colSizes, nc);
-    for (int i = 0; i < nc; i++) {
-        for (int j = col[i]; j < col[i + 1]; j++) {
-            colSizes[row[j]]++;
-        }
-    }
-
-    int *colIndexes = (int *)malloc(nc * sizeof(int));
-    zeroOutArray(colIndexes, nc);
-    int **symmetricRowItems = (int **)malloc(nc * sizeof(int *));
-    for (int i = 0; i < nc; i++)
-        symmetricRowItems[i] = (int *)malloc(colSizes[i] * sizeof(int));
-    for (int i = 0; i < nc; i++) {
-        for (int j = col[i]; j < col[i + 1]; j++) {
-            symmetricRowItems[row[j]][colIndexes[row[j]]] = i;
-            colIndexes[row[j]]++;
-        }
-    }
-
-    // Multiply
-    for (int i = 0; i < nc; i++) {
-        for (int j = col[i]; j < col[i + 1]; j++) {
-            int curRow = i;
-            int curCol = row[j];
-            if (curRow == curCol)
-                continue;
-            int fullRowSize = col[curRow + 1] - col[curRow] + colSizes[curRow];
-            int *fullRow = (int *)malloc(fullRowSize * sizeof(int));
-            mergeArrays(row + col[curRow], symmetricRowItems[curRow], fullRow, col[curRow + 1] - col[curRow], colSizes[curRow]);
-            int fullColSize = col[curCol + 1] - col[curCol] + colSizes[curCol];
-            int *fullCol = (int *)malloc(fullColSize * sizeof(int));
-            mergeArrays(row + col[curCol], symmetricRowItems[curCol], fullCol, col[curCol + 1] - col[curCol], colSizes[curCol]);
-            int sum = countCommonElementsInSortedArrays(fullRow, fullCol, fullRowSize, fullColSize);
-            res[j] = sum;
-            free(fullRow);
-            free(fullCol);
-        }
-    }
-
-    for (int i = 0; i < nc; i++)
-        free(symmetricRowItems[i]);
-    free(symmetricRowItems);
-    free(colIndexes);
-    free(colSizes);
-}
+//void cscMaskedMatrixSquare(int *row, int *col, int *res, int nc) {
+//    int *colSizes = (int *)malloc(nc * sizeof(int));
+//    zeroOutArray(colSizes, nc);
+//    for (int i = 0; i < nc; i++) {
+//        for (int j = col[i]; j < col[i + 1]; j++) {
+//            colSizes[row[j]]++;
+//        }
+//    }
+//
+//    int *colIndexes = (int *)malloc(nc * sizeof(int));
+//    zeroOutArray(colIndexes, nc);
+//    int **symmetricRowItems = (int **)malloc(nc * sizeof(int *));
+//    for (int i = 0; i < nc; i++)
+//        symmetricRowItems[i] = (int *)malloc(colSizes[i] * sizeof(int));
+//    for (int i = 0; i < nc; i++) {
+//        for (int j = col[i]; j < col[i + 1]; j++) {
+//            symmetricRowItems[row[j]][colIndexes[row[j]]] = i;
+//            colIndexes[row[j]]++;
+//        }
+//    }
+//
+//    // Multiply
+//    for (int i = 0; i < nc; i++) {
+//        for (int j = col[i]; j < col[i + 1]; j++) {
+//            int curRow = i;
+//            int curCol = row[j];
+//            if (curRow == curCol)
+//                continue;
+//            int fullRowSize = col[curRow + 1] - col[curRow] + colSizes[curRow];
+//            int *fullRow = (int *)malloc(fullRowSize * sizeof(int));
+//            mergeArrays(row + col[curRow], symmetricRowItems[curRow], fullRow, col[curRow + 1] - col[curRow], colSizes[curRow]);
+//            int fullColSize = col[curCol + 1] - col[curCol] + colSizes[curCol];
+//            int *fullCol = (int *)malloc(fullColSize * sizeof(int));
+//            mergeArrays(row + col[curCol], symmetricRowItems[curCol], fullCol, col[curCol + 1] - col[curCol], colSizes[curCol]);
+//            int sum = countCommonElementsInSortedArrays(fullRow, fullCol, fullRowSize, fullColSize);
+//            res[j] = sum;
+//            free(fullRow);
+//            free(fullCol);
+//        }
+//    }
+//
+//    for (int i = 0; i < nc; i++)
+//        free(symmetricRowItems[i]);
+//    free(symmetricRowItems);
+//    free(colIndexes);
+//    free(colSizes);
+//}

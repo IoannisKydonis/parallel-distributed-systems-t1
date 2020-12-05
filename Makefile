@@ -5,8 +5,8 @@ default: all
 
 all: main
 
-main: main.c
-	$(CC) $(CFLAGS) -o $@ $^ readmtx.c mmio.c coo2csc.c timer.c arrayutils.c -fopenmp -fcilkplus
+main: v4_omp.c
+	$(CC) $(CFLAGS) -o $@ $^ readmtx.c mmio.c coo2csc.c timer.c arrayutils.c -fopenmp
 
 clean:
 	rm -f main
