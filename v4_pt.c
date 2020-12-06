@@ -7,7 +7,6 @@
 #include "arrayutils.h" // binarySearch, zeroOutArray, printArray
 #include "controller.h"
 
-#define NUM_THREADS	12
 
 struct Arg {
     uint32_t *row;
@@ -20,6 +19,7 @@ struct Arg {
     uint32_t executeTo;
 };
 
+int NUM_THREADS = 12;
 pthread_mutex_t mutex;
 
 void *multiplyMatrices(void *argument) {
@@ -108,6 +108,9 @@ int main(int argc, char *argv[]) {
     if (argc < 2) {
         fprintf(stderr, "Usage: %s [matrix-market-filename]\n", argv[0]);
         return EXIT_FAILURE;
+    }
+    if (argc >= 3) {
+        NUM_THREADS = atoi(argv[2]);
     }
 
     uint32_t *rowsCoo, *colsCoo, nr, nc, nnz;
