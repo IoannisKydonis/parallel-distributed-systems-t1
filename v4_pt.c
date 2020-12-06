@@ -19,6 +19,8 @@ struct Arg {
     uint32_t executeTo;
 };
 
+pthread_mutex_t mutex;
+
 void *multiplyMatrices(void *argument) {
     struct Arg a = *(struct Arg *) argument;
 
@@ -35,15 +37,20 @@ void *multiplyMatrices(void *argument) {
             uint32_t *fullCol = (uint32_t *)malloc(fullColSize * sizeof(uint32_t));
             mergeArrays(a.row + a.col[curCol], a.symmetricRowItems[curCol], fullCol, a.col[curCol + 1] - a.col[curCol], a.colSizes[curCol]);
             uint32_t sum = countCommonElementsInSortedArrays(fullRow, fullCol, fullRowSize, fullColSize);
-            a.res[j] = sum;
+            pthread_mutex_lock(&mutex);
+            a.res[curCol] += sum;
+            a.res[curRow] += sum;
+            pthread_mutex_unlock(&mutex);
             free(fullRow);
             free(fullCol);
         }
     }
 }
 
-void cscMaskedMatrixSquare(uint32_t *row, uint32_t *col, uint32_t *res, uint32_t nc) {
+// V4 Parallel with pthreads
+void cscParallelV4Pthreads(uint32_t *row, uint32_t *col, uint32_t *res, uint32_t nc) {
     pthread_t threads[NUM_THREADS];
+    pthread_mutex_init(&mutex,NULL);
 
     uint32_t *colSizes = (uint32_t *)malloc(nc * sizeof(uint32_t));
     zeroOutArray(colSizes, nc);
@@ -84,23 +91,16 @@ void cscMaskedMatrixSquare(uint32_t *row, uint32_t *col, uint32_t *res, uint32_t
     for (uint32_t i = 0; i < NUM_THREADS; i++) {
         pthread_join(threads[i], NULL);
     }
+    for (uint32_t i = 0; i < nc; i++) {
+        res[i] /= 2;
+    }
 
+    pthread_mutex_destroy(&mutex);
     for (uint32_t i = 0; i < nc; i++)
         free(symmetricRowItems[i]);
     free(symmetricRowItems);
     free(colIndexes);
     free(colSizes);
-}
-
-// V4 Parallel with pthreads
-void cscParallelV4Pthreads(uint32_t *rowsCsc, uint32_t *colsCsc, uint32_t *c3, uint32_t nc) {
-    uint32_t *res = (uint32_t *)malloc(colsCsc[nc] * sizeof(uint32_t));
-    cscMaskedMatrixSquare(rowsCsc, colsCsc, res, nc);
-    for (uint32_t i = 0; i < nc; i++) {
-        for (uint32_t j = colsCsc[i]; j < colsCsc[i + 1]; j++) {
-            c3[i] += res[j];
-        }
-    }
 }
 
 void runAndPresentResult(uint32_t *rowsCsc, uint32_t *colsCsc, uint32_t nc, void (* runnable) (uint32_t *, uint32_t *, uint32_t *, uint32_t), char *name) {
