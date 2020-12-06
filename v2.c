@@ -1,5 +1,6 @@
 #include <stdio.h> // fprintf, printf
 #include <stdlib.h> // EXIT_FAILURE, EXIT_SUCCESS
+#include <stdint.h>
 #include "readmtx.h" // readMtxFile
 #include "timer.h" // measureTimeForRunnable
 #include "arrayutils.h" // binarySearch, zeroOutArray, printArray

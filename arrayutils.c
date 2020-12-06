@@ -1,5 +1,6 @@
 #include <stdio.h> // fprintf, printf
 #include <stdlib.h> // malloc
+#include <stdint.h>
 
 uint32_t binarySearch(uint32_t *arr, uint32_t start, uint32_t end, uint32_t target) {
     while (start <= end) {

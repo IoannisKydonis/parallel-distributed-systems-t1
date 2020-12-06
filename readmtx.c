@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include "mmio.h"
 
 int readMtxFile(char *filename, uint32_t **rows, uint32_t **columns, uint32_t *rowCount, uint32_t *colCount, uint32_t *nnz)

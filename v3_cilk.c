@@ -1,5 +1,6 @@
 #include <stdio.h> // fprintf, printf
 #include <stdlib.h> // EXIT_FAILURE, EXIT_SUCCESS
+#include <stdint.h>
 #include <cilk/cilk.h>
 #include <pthread.h>
 #include "readmtx.h" // readMtxFile
