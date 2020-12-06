@@ -5,7 +5,8 @@
 #include "timer.h" // measureTimeForRunnable
 #include "arrayutils.h" // binarySearch, zeroOutArray, printArray
 
-void cscMaskedMatrixSquare(uint32_t *row, uint32_t *col, uint32_t *res, uint32_t nc) {
+// V4 Parallel with OpenMP
+void cscParallelV4Omp(uint32_t *row, uint32_t *col, uint32_t *res, uint32_t nc) {
     uint32_t *colSizes = (uint32_t *)malloc(nc * sizeof(uint32_t));
     zeroOutArray(colSizes, nc);
     for (uint32_t i = 0; i < nc; i++) {
@@ -14,11 +15,12 @@ void cscMaskedMatrixSquare(uint32_t *row, uint32_t *col, uint32_t *res, uint32_t
         }
     }
 
+    // Calculate symmetric csc values
     uint32_t *colIndexes = (uint32_t *)malloc(nc * sizeof(uint32_t));
     zeroOutArray(colIndexes, nc);
     uint32_t **symmetricRowItems = (uint32_t **)malloc(nc * sizeof(uint32_t *));
     for (uint32_t i = 0; i < nc; i++)
-        symmetricRowItems[i] = (uint32_t *)malloc(colSizes[i] * sizeof(uint32_t));
+        symmetricRowItems[i] = (uint32_t *) malloc(colSizes[i] * sizeof(uint32_t));
     for (uint32_t i = 0; i < nc; i++) {
         for (uint32_t j = col[i]; j < col[i + 1]; j++) {
             symmetricRowItems[row[j]][colIndexes[row[j]]] = i;
@@ -41,28 +43,22 @@ void cscMaskedMatrixSquare(uint32_t *row, uint32_t *col, uint32_t *res, uint32_t
             uint32_t *fullCol = (uint32_t *)malloc(fullColSize * sizeof(uint32_t));
             mergeArrays(row + col[curCol], symmetricRowItems[curCol], fullCol, col[curCol + 1] - col[curCol], colSizes[curCol]);
             uint32_t sum = countCommonElementsInSortedArrays(fullRow, fullCol, fullRowSize, fullColSize);
-            res[j] = sum;
+#pragma omp atomic
+            res[curCol] += sum;
+#pragma omp atomic
+            res[curRow] += sum;
             free(fullRow);
             free(fullCol);
         }
     }
-
+    for (uint32_t i = 0; i < nc; i++) {
+        res[i] /= 2;
+    }
     for (uint32_t i = 0; i < nc; i++)
         free(symmetricRowItems[i]);
     free(symmetricRowItems);
     free(colIndexes);
     free(colSizes);
-}
-
-// V4 Parallel with OpenMP
-void cscParallelV4Omp(uint32_t *rowsCsc, uint32_t *colsCsc, uint32_t *c3, uint32_t nc) {
-    uint32_t *res = (uint32_t *)malloc(colsCsc[nc] * sizeof(uint32_t));
-    cscMaskedMatrixSquare(rowsCsc, colsCsc, res, nc);
-    for (uint32_t i = 0; i < nc; i++) {
-        for (uint32_t j = colsCsc[i]; j < colsCsc[i + 1]; j++) {
-            c3[i] += res[j];
-        }
-    }
 }
 
 void runAndPresentResult(uint32_t *rowsCsc, uint32_t *colsCsc, uint32_t nc, void (* runnable) (uint32_t *, uint32_t *, uint32_t *, uint32_t), char *name) {
