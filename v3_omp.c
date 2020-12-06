@@ -31,21 +31,9 @@ void checkForCommonValueInSubarrays(uint32_t *arr, uint32_t start1, uint32_t end
     }
 }
 
-// V3 Parallel with OpenMP
-void cscParallelOmp(uint32_t *rowsCsc, uint32_t *colsCsc, uint32_t *c3, uint32_t nc) {
-#pragma omp parallel for
-    for (uint32_t i = 0; i < nc; i++) {
-        for (uint32_t j = colsCsc[i]; j < colsCsc[i + 1]; j++) {
-            uint32_t subRow = rowsCsc[j];
-            if (i != subRow)
-                checkForCommonValueInSubarrays(rowsCsc, colsCsc[subRow], colsCsc[subRow + 1], j + 1,colsCsc[i + 1], c3, subRow, i);
-        }
-    }
-}
-
 // V3 Parallel with Dynamic OpenMP
 void cscParallelDynamicOmp(uint32_t *rowsCsc, uint32_t *colsCsc, uint32_t *c3, uint32_t nc) {
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic, 30)
     for (uint32_t i = 0; i < nc; i++) {
         for (uint32_t j = colsCsc[i]; j < colsCsc[i + 1]; j++) {
             uint32_t subRow = rowsCsc[j];
@@ -86,7 +74,6 @@ int main(int argc, char *argv[]) {
     coo2csc(rowsCsc, colsCsc, rowsCoo, colsCoo, nnz, nc, 0);
 
 
-    runAndPresentResult(rowsCsc, colsCsc, nc, cscParallelOmp, "V3 OMP");
     runAndPresentResult(rowsCsc, colsCsc, nc, cscParallelDynamicOmp, "V3 Dynamic OMP");
 
     free(rowsCoo);
