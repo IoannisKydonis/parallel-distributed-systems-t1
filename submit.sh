@@ -18,12 +18,14 @@ echo "" > ./output/v4_seq.txt
 
 for i in {1..5}; do
   for file in ./data/*.mtx; do
+	  echo "V3-SEQ with "$file" run number "$i >> ./output/v3_seq.txt
     ./v3_seq $file >> ./output/v3_seq.txt
   done
 done
 
 for i in {1..5}; do
   for file in ./data/*.mtx; do
+	  echo "V4-SEQ with "$file" run number "$i >> ./output/v4_seq.txt
     ./v4_seq $file >> ./output/v4_seq.txt
   done
 done
