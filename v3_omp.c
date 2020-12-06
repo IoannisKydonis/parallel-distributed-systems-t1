@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include "readmtx.h" // readMtxFile
 #include "coo2csc.h" // coo2csc
-#include "timer.h" // measureTimeForRunnable
 #include "arrayutils.h" // binarySearch, zeroOutArray, printArray
+#include "controller.h"
 
 void swapInts(uint32_t *n1, uint32_t *n2) {
     uint32_t temp = *n1;
@@ -43,22 +43,6 @@ void cscParallelDynamicOmp(uint32_t *rowsCsc, uint32_t *colsCsc, uint32_t *c3, u
     }
 }
 
-void runAndPresentResult(uint32_t *rowsCsc, uint32_t *colsCsc, uint32_t nc, void (* runnable) (uint32_t *, uint32_t *, uint32_t *, uint32_t), char *name) {
-    uint32_t *c3 = (uint32_t *)malloc(nc * sizeof(uint32_t));
-    zeroOutArray(c3, nc);
-    double time = measureTimeForRunnable(runnable, rowsCsc, colsCsc, c3, nc);
-    uint32_t triangles = 0;
-    for (uint32_t i = 0; i < nc; i++)
-        triangles += c3[i];
-    triangles /= 3;
-    printf("-----------------------------------\n");
-    printf("| Algorithm: %s\n", name);
-    printf("| Time: %10.6lf\n", time);
-    printf("| Triangles: %d\n", triangles);
-    printf("-----------------------------------\n");
-    free(c3);
-}
-
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         fprintf(stderr, "Usage: %s [matrix-market-filename]\n", argv[0]);
@@ -74,7 +58,7 @@ int main(int argc, char *argv[]) {
     coo2csc(rowsCsc, colsCsc, rowsCoo, colsCoo, nnz, nc, 0);
 
 
-    runAndPresentResult(rowsCsc, colsCsc, nc, cscParallelDynamicOmp, "V3 Dynamic OMP");
+    runAndPresentResult(rowsCsc, colsCsc, nc, cscParallelDynamicOmp, "V3 OMP", "./v3-omp.txt", "./v3-omp-results.txt");
 
     free(rowsCoo);
     free(colsCoo);

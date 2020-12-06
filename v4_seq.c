@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include "readmtx.h" // readMtxFile
 #include "coo2csc.h" // coo2csc
-#include "timer.h" // measureTimeForRunnable
 #include "arrayutils.h" // binarySearch, zeroOutArray, printArray
+#include "controller.h"
 
 // V4 Sequential
 void cscSequentialV4(uint32_t *row, uint32_t *col, uint32_t *res, uint32_t nc) {
@@ -59,22 +59,6 @@ void cscSequentialV4(uint32_t *row, uint32_t *col, uint32_t *res, uint32_t nc) {
     free(colSizes);
 }
 
-void runAndPresentResult(uint32_t *rowsCsc, uint32_t *colsCsc, uint32_t nc, void (* runnable) (uint32_t *, uint32_t *, uint32_t *, uint32_t), char *name) {
-    uint32_t *c3 = (uint32_t *)malloc(nc * sizeof(uint32_t));
-    zeroOutArray(c3, nc);
-    double time = measureTimeForRunnable(runnable, rowsCsc, colsCsc, c3, nc);
-    uint32_t triangles = 0;
-    for (uint32_t i = 0; i < nc; i++)
-        triangles += c3[i];
-    triangles /= 3;
-    printf("-----------------------------------\n");
-    printf("| Algorithm: %s\n", name);
-    printf("| Time: %10.6lf\n", time);
-    printf("| Triangles: %d\n", triangles);
-    printf("-----------------------------------\n");
-    free(c3);
-}
-
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         fprintf(stderr, "Usage: %s [matrix-market-filename]\n", argv[0]);
@@ -89,7 +73,7 @@ int main(int argc, char *argv[]) {
     uint32_t *colsCsc = (uint32_t *)malloc((nc + 1) * sizeof(uint32_t));
     coo2csc(rowsCsc, colsCsc, rowsCoo, colsCoo, nnz, nc, 0);
 
-    runAndPresentResult(rowsCsc, colsCsc, nc, cscSequentialV4, "V4 Sequential");
+    runAndPresentResult(rowsCsc, colsCsc, nc, cscSequentialV4, "V4 Sequential", "./v4-seq.txt", "./v4-seq-results.txt");
 
     free(rowsCoo);
     free(colsCoo);

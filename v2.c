@@ -2,7 +2,6 @@
 #include <stdlib.h> // EXIT_FAILURE, EXIT_SUCCESS
 #include <stdint.h>
 #include "readmtx.h" // readMtxFile
-#include "timer.h" // measureTimeForRunnable
 #include "arrayutils.h" // binarySearch, zeroOutArray, printArray
 
 void cooSequential(uint32_t *rowsCoo, uint32_t *colsCoo, uint32_t *c3, uint32_t nnz, uint32_t nc) {
@@ -29,20 +28,13 @@ void cooSequential(uint32_t *rowsCoo, uint32_t *colsCoo, uint32_t *c3, uint32_t 
     free(adj);
 }
 
-void runAndPresentResult(uint32_t *rowsCsc, uint32_t *colsCsc, uint32_t nc, void (* runnable) (uint32_t *, uint32_t *, uint32_t *, uint32_t), char *name) {
-    uint32_t *c3 = (uint32_t *)malloc(nc * sizeof(uint32_t));
-    zeroOutArray(c3, nc);
-    double time = measureTimeForRunnable(runnable, rowsCsc, colsCsc, c3, nc);
-    uint32_t triangles = 0;
-    for (uint32_t i = 0; i < nc; i++)
-        triangles += c3[i];
-    triangles /= 3;
-    printf("-----------------------------------\n");
-    printf("| Algorithm: %s\n", name);
-    printf("| Time: %10.6lf\n", time);
-    printf("| Triangles: %d\n", triangles);
-    printf("-----------------------------------\n");
-    free(c3);
+void saveResults(uint32_t *results, uint32_t size, char *filename) {
+    FILE *f = fopen(filename, "wb");
+    for (uint32_t i = 0; i < size; i++) {
+        fprintf(f, "%d ", results[i]);
+    }
+    fwrite(results, sizeof(char), size, f);
+    fclose(f);
 }
 
 int main(int argc, char *argv[]) {
@@ -65,6 +57,7 @@ int main(int argc, char *argv[]) {
     printf("-----------------------------------\n");
     printf("| Triangles: %d\n", triangles);
     printf("-----------------------------------\n");
+    saveResults(c3, nc, "./v2-seq.txt");
     free(c3);
 
     free(rowsCoo);
